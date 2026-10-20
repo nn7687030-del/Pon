@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>Admin · profit & caption manager</title>
+  <!-- Font Awesome 6 (free) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    /* ----- RESET & BASE (consistent with main site) ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: #0b0b0f;
+      color: #f0eef5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1.2rem 0.8rem 2.5rem;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 10%, rgba(180, 130, 255, 0.08), transparent 60%),
+                  radial-gradient(circle at 90% 70%, rgba(255, 140, 200, 0.06), transparent 60%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .app {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    /* ----- HEADER / BRANDING (admin style) ----- */
+    .header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 0 0.2rem;
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+    }
+
+    .logo-icon {
+      background: linear-gradient(145deg, #b17aff, #8a4dff);
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      box-shadow: 0 10px 20px -8px rgba(138, 77, 255, 0.5);
+    }
+
+    .logo-text {
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.02em;
+      background: linear-gradient(135deg, #ffffff, #cfbaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .admin-badge {
+      background: rgba(255, 193, 7, 0.15);
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      border: 1px solid rgba(255, 193, 7, 0.4);
+      color: #ffe08a;
+      white-space: nowrap;
+    }
+
+    .admin-badge i {
+      font-size: 0.8rem;
+      color: #ffc107;
+    }
+
+    /* quick nav link to main site (simulated) */
+    .nav-link {
+      color: #b7a8d9;
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #1c1628;
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      border: 1px solid #312942;
+      transition: 0.2s;
+    }
+
+    .nav-link:hover {
+      background: #2b2040;
+      color: white;
+    }
+
+    /* ----- ADMIN HEADER / SUMMARY CARDS ----- */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2.2rem;
+    }
+
+    .stat-card {
+      background: #15111f;
+      border-radius: 24px;
+      padding: 1.2rem 1.2rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      box-shadow: 0 15px 25px -12px #000000;
+      transition: border 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: #3d2e5a;
+    }
+
+    .stat-label {
+      font-size: 0.8rem;
+      color: #a397ba;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label i {
+      color: #b17aff;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #e8e2f5;
+      line-height: 1.2;
+    }
+
+    .stat-value small {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #8c80a3;
+      margin-left: 4px;
+    }
+
+    /* ----- TABS / PANELS ----- */
+    .admin-panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .panel-card {
+      background: #13101c;
+      border-radius: 28px;
+      padding: 1.8rem 1.8rem 2rem;
+      border: 1px solid #241f33;
+      box-shadow: 0 30px 40px -30px #000000;
+      flex: 1 1 340px;
+    }
+
+    .panel-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 1.5rem;
+    }
+
+    .panel-title i {
+      color: #b17aff;
+    }
+
+    .panel-title .badge {
+      font-size: 0.7rem;
+      background: #2b1f3b;
+      padding: 0.2rem 0.8rem;
+      border-radius: 30px;
+      color: #c6b1f0;
+      font-weight: 500;
+      margin-left: 8px;
+    }
+
+    /* form elements */
+    .form-group {
+      margin-bottom: 1.4rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #b7adcc;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group label i {
+      color: #8a7aa8;
+      font-size: 0.8rem;
+    }
+
+    .form-control {
+      width: 100%;
+      background: #1b1626;
+      border: 1.5px solid #2d253d;
+      border-radius: 16px;
+      padding: 0.9rem 1.2rem;
+      color: #f0eef5;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: #b17aff;
+      box-shadow: 0 0 0 3px rgba(177, 122, 255, 0.15);
+    }
+
+    .form-control::placeholder {
+      color: #5f5577;
+      font-size: 0.9rem;
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .input-with-icon {
+      position: relative;
+    }
+
+    .input-with-icon i {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6f5d8a;
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    /* action buttons */
+    .btn-primary {
+      background: linear-gradient(145deg, #a46eff, #6f3aff);
+      border: none;
+      border-radius: 60px;
+      padding: 1rem 1.8rem;
+      font-weight: 600;
+      font-size: 1rem;
+      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 12px 20px -8px #6f3aff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      width: 100%;
+    }
+
+    .btn-primary i {
+      font-size: 1.1rem;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(145deg, #b885ff, #7b4aff);
+      box-shadow: 0 18px 28px -8px #8a5aff;
+      transform: scale(1.01);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background: #221b30;
+      border: 1px solid #3a2d51;
+      border-radius: 60px;
+      padding: 0.7rem 1.4rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #cfc1e8;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-secondary:hover {
+      background: #2f2542;
+      border-color: #5d4a7a;
+      color: white;
+    }
+
+    /* list of recent entries */
+    .entry-list {
+      margin-top: 1.8rem;
+    }
+
+    .entry-list h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #a397ba;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .entry-item {
+      background: #1b1626;
+      border-radius: 14px;
+      padding: 0.8rem 1rem;
+      margin-bottom: 0.6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      border-left: 3px solid #b17aff;
+      animation: fadeIn 0.25s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .entry-item .entry-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+    }
+
+    .entry-item .entry-desc {
+      font-weight: 500;
+      color: #e8e2f5;
+      word-break: break-word;
+    }
+
+    .entry-item .entry-meta {
+      font-size: 0.7rem;
+      color: #8c80a3;
+      display: flex;
+      gap: 10px;
+    }
+
+    .entry-item .entry-amount {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #c9b0ff;
+      white-space: nowrap;
+      margin-left: 10px;
+    }
+
+    .entry-amount small {
+      font-size: 0.65rem;
+      font-weight: 400;
+      color: #8c80a3;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #5f5577;
+      font-size: 0.85rem;
+      padding: 1.8rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .empty-state i {
+      font-size: 1.8rem;
+      opacity: 0.4;
+    }
+
+    /* toast message */
+    .toast-message {
+      position: fixed;
+      bottom: 25px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #2a1e3a;
+      backdrop-filter: blur(12px);
+      color: #e8dcff;
+      padding: 0.9rem 2rem;
+      border-radius: 60px;
+      font-weight: 500;
+      font-size: 0.95rem;
+      box-shadow: 0 20px 30px -10px black;
+      border: 1px solid #5d4a7a;
+      opacity: 0;
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .toast-message.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* responsive */
+    @media (max-width: 700px) {
+      .admin-panel { flex-direction: column; }
+      .panel-card { padding: 1.4rem; }
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+      .header { flex-direction: column; align-items: flex-start; gap: 0.8rem; }
+    }
+
+    @media (max-width: 400px) {
+      .summary-grid { grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+      .stat-value { font-size: 1.5rem; }
+    }
+
+    /* small helper */
+    .text-muted { color: #7a6d94; font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- header -->
+    <header class="header">
+      <div class="logo-area">
+        <div class="logo-icon"><i class="fas fa-crown"></i></div>
+        <div class="logo-text">admin<span style="color:#b17aff;">.</span></div>
+      </div>
+      <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <div class="admin-badge">
+          <i class="fas fa-shield-alt"></i> admin mode
+        </div>
+        <a href="#" class="nav-link" onclick="event.preventDefault(); showToast('Back to main site (demo)')">
+          <i class="fas fa-external-link-alt"></i> main site
+        </a>
+      </div>
+    </header>
+
+    <!-- summary stats -->
+    <div class="summary-grid">
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-coins"></i> total profit</div>
+        <div class="stat-value" id="totalProfitStat">0 <small>KES</small></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-receipt"></i> entries</div>
+        <div class="stat-value" id="entryCountStat">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><i class="fas fa-calendar-check"></i> this month</div>
+        <div class="stat-value" id="monthProfitStat">0 <small>KES</small></div>
+      </div>
+    </div>
+
+    <!-- admin panel: two columns -->
+    <div class="admin-panel">
+      <!-- LEFT: add profit / caption form -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <i class="fas fa-pen-fancy"></i> add profit & caption
+          <span class="badge">new</span>
+        </div>
+
+        <form id="profitForm">
+          <div class="form-group">
+            <label><i class="fas fa-tag"></i> caption / description</label>
+            <input type="text" class="form-control" id="captionInput" placeholder="e.g., massage session – vip" required>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-money-bill-wave"></i> amount (KES)</label>
+            <div class="input-with-icon">
+              <input type="number" class="form-control" id="amountInput" placeholder="500" min="1" step="1" required>
+              <i class="fas fa-coins"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><i class="fas fa-calendar-alt"></i> date (optional)</label>
+            <input type="date" class="form-control" id="dateInput">
+          </div>
+
+          <button type="submit" class="btn-primary">
+            <i class="fas fa-plus-circle"></i> add profit entry
+          </button>
+        </form>
+
+        <div class="entry-list" id="recentEntriesList">
+          <h4><i class="fas fa-history"></i> recent entries</h4>
+          <div id="entryItemsContainer">
+            <!-- dynamic entries will appear here -->
+            <div class="empty-state">
+              <i class="fas fa-receipt"></i>
+              no entries yet. add your first profit.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: preview / caption management -->
+      <div class="panel-card">
+        <div class="panel-title">
+          <i class="fas fa-image"></i> caption highlights
+          <span class="badge">latest 3</span>
+        </div>
+        <p class="text-muted" style="margin-bottom: 1.2rem; font-size: 0.85rem;">
+          <i class="fas fa-info-circle"></i> Captions from profit entries are shown here.
+        </p>
+        <div id="captionPreviewList">
+          <!-- dynamic captions will appear here -->
+          <div class="empty-state">
+            <i class="fas fa-comment-dots"></i>
+            no captions yet.
+          </div>
+        </div>
+
+        <!-- quick profit hint -->
+        <div style="margin-top: 2rem; background: #1b1626; padding: 1.2rem; border-radius: 18px;">
+          <div style="display: flex; align-items: center; gap: 12px; color: #b7adcc; font-size: 0.9rem;">
+            <i class="fas fa-chart-line" style="color: #b17aff; font-size: 1.4rem;"></i>
+            <span>Profit entries update the dashboard automatically.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- toast -->
+  <div id="toast" class="toast-message"><i class="fas fa-check-circle"></i> <span id="toastText">Profit added</span></div>
+
+  <script>
+    (function() {
+      // ---------- state ----------
+      // Load from localStorage or start with sample data (for demo)
+      let profitEntries = [];
+
+      // Try to load from localStorage
+      const STORAGE_KEY = 'massage_admin_profits';
+      function loadEntries() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            profitEntries = JSON.parse(stored);
+          } catch (e) {
+            profitEntries = [];
+          }
+        } else {
+          // initial sample entries for demonstration
+          profitEntries = [
+            { id: 1, caption: 'VIP massage – Mia', amount: 1500, date: getDateOffset(-1) },
+            { id: 2, caption: 'Deep tissue – Zara', amount: 1200, date: getDateOffset(-2) },
+            { id: 3, caption: 'Couples massage – Luna', amount: 2500, date: getDateOffset(-3) },
+            { id: 4, caption: 'Quick session – Chloe', amount: 500, date: getDateOffset(-5) },
+          ];
+          persistEntries();
+        }
+      }
+
+      function getDateOffset(days) {
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        return d.toISOString().split('T')[0];
+      }
+
+      function persistEntries() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(profitEntries));
+      }
+
+      // DOM elements
+      const profitForm = document.getElementById('profitForm');
+      const captionInput = document.getElementById('captionInput');
+      const amountInput = document.getElementById('amountInput');
+      const dateInput = document.getElementById('dateInput');
+      const totalProfitStat = document.getElementById('totalProfitStat');
+      const entryCountStat = document.getElementById('entryCountStat');
+      const monthProfitStat = document.getElementById('monthProfitStat');
+      const entryItemsContainer = document.getElementById('entryItemsContainer');
+      const captionPreviewList = document.getElementById('captionPreviewList');
+      const toast = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+
+      // set today's date as default
+      function setDefaultDate() {
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+      }
+
+      // ---------- toast ----------
+      let toastTimer;
+      function showToast(message, isSuccess = true) {
+        toastText.textContent = message;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove('show');
+        }, 2800);
+      }
+
+      // ---------- update UI ----------
+      function updateStats() {
+        // total profit
+        const total = profitEntries.reduce((sum, e) => sum + Number(e.amount), 0);
+        totalProfitStat.innerHTML = `${total.toLocaleString()} <small>KES</small>`;
+
+        // count
+        entryCountStat.textContent = profitEntries.length;
+
+        // this month profit
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const monthTotal = profitEntries
+          .filter(e => {
+            if (!e.date) return false;
+            const d = new Date(e.date);
+            return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+          })
+          .reduce((sum, e) => sum + Number(e.amount), 0);
+        monthProfitStat.innerHTML = `${monthTotal.toLocaleString()} <small>KES</small>`;
+      }
+
+      function renderRecentEntries() {
+        // sort by date descending (newest first) and take last 5
+        const sorted = [...profitEntries].sort((a, b) => {
+          const dateA = a.date || '';
+          const dateB = b.date || '';
+          return dateB.localeCompare(dateA);
+        }).slice(0, 5);
+
+        if (sorted.length === 0) {
+          entryItemsContainer.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-receipt"></i>
+              no entries yet. add your first profit.
+            </div>
+          `;
+          return;
+        }
+
+        entryItemsContainer.innerHTML = sorted.map(entry => `
+          <div class="entry-item">
+            <div class="entry-content">
+              <span class="entry-desc">${escapeHtml(entry.caption)}</span>
+              <span class="entry-meta">
+                <i class="far fa-calendar"></i> ${entry.date || 'no date'}
+              </span>
+            </div>
+            <div class="entry-amount">${Number(entry.amount).toLocaleString()} <small>KES</small></div>
+          </div>
+        `).join('');
+      }
+
+      function renderCaptionPreviews() {
+        // show latest 3 captions (unique, just for preview)
+        const sorted = [...profitEntries].sort((a, b) => {
+          const dateA = a.date || '';
+          const dateB = b.date || '';
+          return dateB.localeCompare(dateA);
+        }).slice(0, 3);
+
+        if (sorted.length === 0) {
+          captionPreviewList.innerHTML = `
+            <div class="empty-state">
+              <i class="fas fa-comment-dots"></i>
+              no captions yet.
+            </div>
+          `;
+          return;
+        }
+
+        captionPreviewList.innerHTML = sorted.map(entry => `
+          <div class="entry-item" style="border-left-color: #4cd964;">
+            <div class="entry-content">
+              <span class="entry-desc"><i class="fas fa-quote-left" style="opacity:0.5; margin-right:4px;"></i> ${escapeHtml(entry.caption)}</span>
+              <span class="entry-meta">${entry.date || 'recent'}</span>
+            </div>
+            <div class="entry-amount" style="font-size:0.9rem;">${Number(entry.amount).toLocaleString()} KES</div>
+          </div>
+        `).join('');
+      }
+
+      // simple HTML escape
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function refreshAll() {
+        updateStats();
+        renderRecentEntries();
+        renderCaptionPreviews();
+      }
+
+      // ---------- add new profit ----------
+      profitForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const caption = captionInput.value.trim();
+        const amount = parseFloat(amountInput.value);
+        let date = dateInput.value;
+
+        if (!caption) {
+          showToast('Please enter a caption', false);
+          return;
+        }
+        if (isNaN(amount) || amount <= 0) {
+          showToast('Please enter a valid amount', false);
+          return;
+        }
+        if (!date) {
+          date = new Date().toISOString().split('T')[0];
+        }
+
+        // create new entry
+        const newEntry = {
+          id: Date.now(), // simple unique id
+          caption: caption,
+          amount: amount,
+          date: date
+        };
+
+        profitEntries.push(newEntry);
+        persistEntries();
+
+        // reset form (keep date as today)
+        captionInput.value = '';
+        amountInput.value = '';
+        setDefaultDate();
+
+        refreshAll();
+        showToast(`✅ Added "${caption}" · ${amount.toLocaleString()} KES`);
+      });
+
+      // also allow date reset
+      function initDate() {
+        setDefaultDate();
+      }
+
+      // ---------- init ----------
+      loadEntries();
+      refreshAll();
+      initDate();
+
+      // Expose for any debugging (optional)
+      window.profitEntries = profitEntries;
+    })();
+  </script>
+</body>
+</html>
